@@ -1,5 +1,8 @@
 import numbers
+import math
 
+ACCURACY = 10e-6
+SPEED_BREAK = 4000
 
 class Polynom:
 
@@ -42,17 +45,25 @@ class Polynom:
         return Polynom(coeffs_inte)
 
     def factor_out_to_int(self):
-        factor = 1
-        outPoly = Polynom([*self.coefficients])
-        for i in range(len(outPoly.coefficients)):
-            if abs(outPoly.coefficients[i] - int(outPoly.coefficients[i]))  > 10e-4:
-                factor *= outPoly.coefficients[i]
-                for j in range(len(outPoly.coefficients)):
-                    if j!=i: outPoly.coefficients[j] *= 1/outPoly.coefficients[i]
-                outPoly.coefficients[i] = 1
-        return factor, outPoly
+        factor = numbers.least_common_multiplier([c for c in self.coefficients])
+        coefficients = [c * factor for c in self.coefficients]
+        outPoly = Polynom(coefficients)
+        return 1 / factor, outPoly
 
 
+
+    def limit(self, x):
+        if len(self.coefficients) == 1:
+            return self.coefficients[0]
+        if x == math.inf:
+            return numbers.sign(self.coefficients[-1]) * math.inf
+        elif x == -math.inf:
+            if len(self.coefficients) % 2 == 1:
+                return numbers.sign(self.coefficients[-1]) * math.inf
+            else:
+                return -1 * numbers.sign(self.coefficients[-1]) * math.inf
+        else:
+            return self(x)
 
     def solve(self):
         if len(self.coefficients) == 1:
@@ -70,9 +81,8 @@ class Polynom:
                 return [-b / (2 * a)]
             return [(-b - delta ** 0.5) / (2 * a), (-b + delta ** 0.5) / (2 * a)]
 
-
-        fac, pl = self.factor_out_to_int()
         # Try Rational Root Theorem
+        fac, pl = self.factor_out_to_int()
         a = pl.coefficients[0]
         b = pl.coefficients[-1]
         divisors_a = numbers.factors(abs(a))
@@ -80,22 +90,23 @@ class Polynom:
         solutions = set()
         for i in divisors_a:
             for j in divisors_b:
-                if abs(pl(i / j)) <= 10e-6:
-                    solutions.add((i / j) * fac)
-                if abs(pl(-i / j)) <= 10e-6:
-                    solutions.add((-i / j) * fac)
+                if abs(pl(i / j)) <= ACCURACY:
+                    solutions.add((i / j))
+                if abs(pl(-i / j)) <= ACCURACY:
+                    solutions.add((-i / j))
         if len(solutions) > 0:
             n = self
             for s in solutions:
                 n = n // Polynom([-s, 1])
             return list(set(list(solutions) + n.solve()))
 
+
         # Use Newton's method
         x = 0
         deri = self.get_derivative()
         y = self(x)
-        n = 4000
-        while abs(y) > 1e-10:
+        n = SPEED_BREAK
+        while abs(y) > ACCURACY:
             x = x - y / deri(x)
             y = self(x)
             n-=1
@@ -195,3 +206,61 @@ class Polynom:
             s += str(self.coefficients[i]) + "x^{" + str(i) + "} + "
         s += str(self.coefficients[0])
         return s
+
+    def get_max(self, interval=(-math.inf, -math.inf)):
+        m1 = self.limit(interval[0])
+        m2 = self.limit(interval[1])
+        m = max(m1, m2)
+        if m == math.inf:
+            return math.inf
+        deri = self.get_derivative()
+        extrems = deri.solve()
+        for extrem in extrems:
+            if interval[0] <= extrem <= interval[1]:
+                m = max(m, self(extrem))
+        return m
+
+    def get_min(self, interval=(-math.inf, math.inf)):
+        m1 = self.limit(interval[0])
+        m2 = self.limit(interval[1])
+        m = min(m1, m2)
+        if m == -math.inf:
+            return -math.inf
+        deri = self.get_derivative()
+        extrems = deri.solve()
+        for extrem in extrems:
+            if interval[0] <= extrem <= interval[1]:
+                m = min(m, self(extrem))
+        return m
+
+    def get_extrems(self):
+        deri = self.get_derivative()
+        return deri.solve()
+
+    def get_all_max(self, interval=(-math.inf, -math.inf)):
+        deri1 = self.get_derivative()
+        deri2 = deri1.get_derivative()
+        extrems = deri1.solve()
+        return [x for x in extrems if interval[0] <= x <= interval[1] and deri2(x) < 0]
+
+    def get_all_min(self, interval=(-math.inf, -math.inf)):
+        deri1 = self.get_derivative()
+        deri2 = deri1.get_derivative()
+        extrems = deri1.solve()
+        return [x for x in extrems if interval[0] <= x <= interval[1] and deri2(x) > 0]
+
+    def integral(self, a, b):
+        inte = self.get_integral()
+        return inte(b) - inte(a)
+
+
+
+
+
+def create_taylor( derivatives:list):
+    f = 1
+    coeff = []
+    for i in range(len(derivatives)):
+        coeff.append(derivatives[i] / f)
+        f*=(i+1)
+    return Polynom(coeff)

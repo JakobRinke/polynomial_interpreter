@@ -1,4 +1,5 @@
-from polynom import Polynom
+from polynom import Polynom, create_taylor
+import math
 
 
 def creationTest():
@@ -58,6 +59,12 @@ def factorOutTest():
     fac, pol = p1.factor_out_to_int()
     print(p1)
     print(fac, "  * (", pol, ")")
+    print()
+
+    p2 = Polynom([0.5, 0.33, 0.16, 0.23])
+    fac, pol = p2.factor_out_to_int()
+    print(p2)
+    print(fac, "  * (", pol, ")")
 
 
 def divisionTest():
@@ -86,6 +93,40 @@ def solveTest():
     print(p4)
     print(p4.solve())
 
+def limitTest():
+    print("Limit test:")
+    p1 = Polynom([4, 2, 3])
+    print(p1)
+    print(p1.limit(0))
+    print(p1.limit(math.inf))
+    print(p1.limit(-math.inf))
+
+    p2 = Polynom([1, 2, 3, -4])
+    print(p2)
+    print(p2.limit(math.inf))
+    print(p2.limit(-math.inf))
+
+
+def taylorTest():
+    # Test with sin(x)
+    print("Taylor test:")
+    print("SIN TEST:")
+    derivatives_at_0 = [0, 1, 0, -1, 0, 1, 0, -1, 0, 1]
+    sin = create_taylor(derivatives_at_0)
+    print(sin)
+    # Test vs math.sin
+    for i in range(10):
+        print(abs(sin(i) - math.sin(i)))
+
+    print("EXP TEST:")
+    # Test with exp(x)
+    derivatives_at_0 = [1] * 10
+    exp = create_taylor(derivatives_at_0)
+    print(exp)
+    # Test vs math.exp
+    for i in range(10):
+        print(abs(sin(i) - math.sin(i)))
+
 
 
 
@@ -103,5 +144,7 @@ if __name__ == '__main__':
     factorOutTest()
     divisionTest()
     solveTest()
+    limitTest()
+    taylorTest()
 
 
