@@ -207,7 +207,7 @@ class Polynom:
         s += str(self.coefficients[0])
         return s
 
-    def get_max(self, interval=(-math.inf, -math.inf)):
+    def max(self, interval=(-math.inf, -math.inf)):
         m1 = self.limit(interval[0])
         m2 = self.limit(interval[1])
         m = max(m1, m2)
@@ -220,7 +220,7 @@ class Polynom:
                 m = max(m, self(extrem))
         return m
 
-    def get_min(self, interval=(-math.inf, math.inf)):
+    def min(self, interval=(-math.inf, math.inf)):
         m1 = self.limit(interval[0])
         m2 = self.limit(interval[1])
         m = min(m1, m2)
@@ -237,13 +237,13 @@ class Polynom:
         deri = self.get_derivative()
         return deri.solve()
 
-    def get_all_max(self, interval=(-math.inf, -math.inf)):
+    def get_all_max(self, interval=(-math.inf, math.inf)):
         deri1 = self.get_derivative()
         deri2 = deri1.get_derivative()
         extrems = deri1.solve()
         return [x for x in extrems if interval[0] <= x <= interval[1] and deri2(x) < 0]
 
-    def get_all_min(self, interval=(-math.inf, -math.inf)):
+    def get_all_min(self, interval=(-math.inf, math.inf)):
         deri1 = self.get_derivative()
         deri2 = deri1.get_derivative()
         extrems = deri1.solve()
@@ -257,10 +257,55 @@ class Polynom:
 
 
 
-def create_taylor( derivatives:list):
-    f = 1
-    coeff = []
-    for i in range(len(derivatives)):
-        coeff.append(derivatives[i] / f)
-        f*=(i+1)
-    return Polynom(coeff)
+def create_taylor( derivatives:list, start=0):
+    if start == 0:
+        f = 1
+        coeff = []
+        for i in range(len(derivatives)):
+            coeff.append(derivatives[i] / f)
+            f*=(i+1)
+        return Polynom(coeff)
+    else:
+        f = 1
+        coeff = [0] * len(derivatives)
+        # Use binomial coefficient for taylor at (x- start)
+        for i in range(len(derivatives)):
+            for l in range(i+1):
+                coeff[i-l] += (derivatives[i] / f) * math.comb(i, l) *  (-start)**(l)
+            f*=(i+1)
+        return Polynom(coeff)
+
+def find_intersection(p1:Polynom, p2:Polynom):
+    # Find union of two polynoms
+    p = p1 - p2
+    return [(x, p1(x)) for x in p.solve()]
+
+def polynom_from_string(s:str):
+    s = s.lower()
+    s = s.replace(" ", "")
+    factors = s.split("+")
+    factors.reverse()
+    coefficients = []
+    for factor in factors:
+        if factor == "":
+            continue
+        cf = factor.split("x^")
+        if len(cf) == 1:
+            coeff = cf[0]
+            power = ""
+        else:
+            coeff = cf[0]
+            power = cf[1]
+        if coeff == "":
+            coeff = 1
+        if power == "":
+            power = 0
+        elif power == "{}":
+            power = 1
+        else:
+            power = int(power.replace("{", "").replace("}", ""))
+        if len(coefficients) <= power:
+            coefficients += [0] * (power - len(coefficients) + 1)
+        coefficients[power] = float(coeff)
+    return Polynom(coefficients)
+
