@@ -47,6 +47,24 @@ class Polynom:
                 return [-b / (2 * a)]
             return [(-b - delta ** 0.5) / (2 * a), (-b + delta ** 0.5) / (2 * a)]
 
+        # Try Rational Root Theorem
+        a = self.coefficients[0]
+        b = self.coefficients[-1]
+        divisors_a = numbers.factors(abs(a))
+        divisors_b = numbers.factors(abs(b))
+        solutions = set()
+        for i in divisors_a:
+            for j in divisors_b:
+                if abs(self(i / j)) <= 10e-6:
+                    solutions.add(i / j)
+                if abs(self(-i / j)) <= 10e-6:
+                    solutions.add(-i / j)
+        if len(solutions) > 0:
+            n = self
+            for s in solutions:
+                n = n // Polynom([-s, 1])
+            return list(set(list(solutions) + n.solve()))
+
         # Use Newton's method
         x = 0
         deri = self.get_derivative()
@@ -58,7 +76,6 @@ class Polynom:
             n-=1
             if n <= 0:
                 return []
-        x = round(x, 4)
         return list(set([x] + (self // Polynom([-x, 1])).solve()))
 
 
