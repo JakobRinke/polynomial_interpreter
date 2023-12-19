@@ -4,6 +4,8 @@ import numbers
 class Polynom:
 
     def __init__(self, coefficients):
+        if coefficients == []:
+            coefficients = [0]
         for i in range(len(coefficients)-1, 0, -1):
             if coefficients[i] == 0:
                 coefficients.pop(i)
@@ -31,6 +33,25 @@ class Polynom:
             coeffs_deri[i] = self.coefficients[i+1] * (i+1)
         return Polynom(coeffs_deri)
 
+    def get_integral(self):
+        coeffs_inte = [0] * (len(self.coefficients) + 1)
+        for i in range(len(self.coefficients)):
+            coeffs_inte[i+1] = self.coefficients[i] / (i+1)
+        return Polynom(coeffs_inte)
+
+    def factor_out_to_int(self):
+        factor = 1
+        outPoly = Polynom([*self.coefficients])
+        for i in range(len(outPoly.coefficients)):
+            if abs(outPoly.coefficients[i] - int(outPoly.coefficients[i]))  > 10e-4:
+                factor *= outPoly.coefficients[i]
+                for j in range(len(outPoly.coefficients)):
+                    if j!=i: outPoly.coefficients[j] *= 1/outPoly.coefficients[i]
+                outPoly.coefficients[i] = 1
+        return factor, outPoly
+
+
+
     def solve(self):
         if len(self.coefficients) == 1:
             return []
@@ -47,18 +68,20 @@ class Polynom:
                 return [-b / (2 * a)]
             return [(-b - delta ** 0.5) / (2 * a), (-b + delta ** 0.5) / (2 * a)]
 
+
+        fac, pl = self.factor_out_to_int()
         # Try Rational Root Theorem
-        a = self.coefficients[0]
-        b = self.coefficients[-1]
+        a = pl.coefficients[0]
+        b = pl.coefficients[-1]
         divisors_a = numbers.factors(abs(a))
         divisors_b = numbers.factors(abs(b))
         solutions = set()
         for i in divisors_a:
             for j in divisors_b:
-                if abs(self(i / j)) <= 10e-6:
-                    solutions.add(i / j)
-                if abs(self(-i / j)) <= 10e-6:
-                    solutions.add(-i / j)
+                if abs(pl(i / j)) <= 10e-6:
+                    solutions.add((i / j) * fac)
+                if abs(pl(-i / j)) <= 10e-6:
+                    solutions.add((-i / j) * fac)
         if len(solutions) > 0:
             n = self
             for s in solutions:

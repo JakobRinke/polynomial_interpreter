@@ -52,6 +52,13 @@ def derivativeTest():
     p1 = Polynom([4, 2, 3])
     print(p1.get_derivative())
 
+def factorOutTest():
+    print("Factor out test:")
+    p1 = Polynom([0.5, 0.25, 0.1])
+    fac, pol = p1.factor_out_to_int()
+    print(p1)
+    print(fac, "  * (", pol, ")")
+
 
 def divisionTest():
     print("Division test:")
@@ -93,6 +100,7 @@ if __name__ == '__main__':
     powerTest()
     equalityTest()
     derivativeTest()
+    factorOutTest()
     divisionTest()
     solveTest()
 
