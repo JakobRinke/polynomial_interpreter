@@ -15,8 +15,10 @@ class Polynom:
 
     def calc(self, x):
         y = 0
+        x_c = 1
         for i in range(len(self.coefficients)):
-            y += x ** i * self.coefficients[i]
+            y += x_c * self.coefficients[i]
+            x_c *= x
         return y
 
     def __call__(self, x):
