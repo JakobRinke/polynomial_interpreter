@@ -1,4 +1,7 @@
-from polynom import Polynom, create_taylor, polynom_from_string
+try:
+    from polynom import *
+except:
+    from .polynom import *
 import math
 
 
@@ -152,6 +155,10 @@ def fromStringTest():
     p2 = polynom_from_string(str(p1))
     assert p1 == p2
 
+def createFromRootsTest():
+    p1 = create_polynom_from_roots([-1, 0, 1, 2])
+    assert p1 == Polynom([0, 2, -1, -2, 1])
+
 
 tests = [
     creationTest,
@@ -169,12 +176,13 @@ tests = [
     limitTest,
     minmaxTest,
     taylorTest,
-    fromStringTest
+    fromStringTest,
+    createFromRootsTest
 ]
 
 
-def run_all_test():
-    for test in tests:
+def run_all_test(testings):
+    for test in testings:
         try:
             test()
             print('\033[92m', test.__name__.ljust(30), "passed", '\033[0m')
@@ -183,6 +191,6 @@ def run_all_test():
 
 
 if __name__ == '__main__':
-    run_all_test()
+    run_all_test(tests)
 
 

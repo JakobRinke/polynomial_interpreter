@@ -309,3 +309,10 @@ def polynom_from_string(s:str):
         coefficients[power] = float(coeff)
     return Polynom(coefficients)
 
+def create_polynom_from_roots(roots):
+    p = Polynom([1])
+    for root in roots:
+        p *= Polynom([-root, 1])
+    return p
+
+
