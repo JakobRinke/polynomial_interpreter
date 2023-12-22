@@ -45,7 +45,7 @@ class Polynom:
         return Polynom(coeffs_inte)
 
     def factor_out_to_int(self):
-        factor = numbers.least_common_multiplier([c for c in self.coefficients])
+        factor = numbers.least_common_multiplier([c for c in (self.coefficients + [1])])
         coefficients = [c * factor for c in self.coefficients]
         outPoly = Polynom(coefficients)
         return 1 / factor, outPoly
@@ -82,23 +82,25 @@ class Polynom:
             return [(-b - delta ** 0.5) / (2 * a), (-b + delta ** 0.5) / (2 * a)]
 
         # Try Rational Root Theorem
-        fac, pl = self.factor_out_to_int()
+        fac, pl = self.factor_out_to_int() 
         a = pl.coefficients[0]
         b = pl.coefficients[-1]
+
         divisors_a = numbers.factors(abs(a))
         divisors_b = numbers.factors(abs(b))
-        solutions = set()
-        for i in divisors_a:
-            for j in divisors_b:
-                if abs(pl(i / j)) <= ACCURACY:
-                    solutions.add((i / j))
-                if abs(pl(-i / j)) <= ACCURACY:
-                    solutions.add((-i / j))
-        if len(solutions) > 0:
-            n = self
-            for s in solutions:
-                n = n // Polynom([-s, 1])
-            return list(set(list(solutions) + n.solve()))
+        if len(divisors_a) * len(divisors_b) <= SPEED_BREAK:
+            solutions = set()
+            for i in divisors_a:
+                for j in divisors_b:
+                    if abs(pl(i / j)) <= ACCURACY:
+                        solutions.add((i / j))
+                    if abs(pl(-i / j)) <= ACCURACY:
+                        solutions.add((-i / j))
+            if len(solutions) > 0:
+                n = self
+                for s in solutions:
+                    n = n // Polynom([-s, 1])
+                return list(set(list(solutions) + n.solve()))
 
 
         # Use Newton's method
