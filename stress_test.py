@@ -16,7 +16,7 @@ def integerRootsTest():
         k = polynom.solve()
         s2 = sum(k)
         if len(st) == len(k):
-            print("\tAccuracy at ".ljust(15), str(i).rjust(3), "  ", str(round(1-abs(1-s/s2)*100)).rjust(7), '\033[0m')
+            print("\tdist at ".ljust(15), str(i).rjust(3), "  ", str(abs((s-s2))).rjust(7), '\033[0m')
         else:
             print("\tFailed at ", i, '\033[0m')
             assert False
@@ -37,7 +37,7 @@ def rationalRootsTest():
         k = polynom.solve()
         s2 = sum(k)
         if len(st) == len(k):
-            print("\tAccuracy at ".ljust(15), str(i).rjust(3), "  ", str(round(1-abs(1-s/s2)*100)).rjust(7), '\033[0m')
+            print("\tdist at ".ljust(15), str(i).rjust(3), "  ", str(abs((s-s2))).rjust(7), '\033[0m')
         else:
             print("\tFailed at ", i, '\033[0m')
             assert False

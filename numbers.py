@@ -7,8 +7,6 @@ def factors(n):
     return set(flatten_iter((i, n//i)
                 for i in range(1, int(n**0.5)+1) if n % i == 0))
 
-
-
 def least_common_multiplier(rationals):
     denominators = [Fraction(r).denominator for r in rationals]
 

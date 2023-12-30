@@ -1,8 +1,8 @@
 import numbers
 import math
 
-ACCURACY = 10e-6
-SPEED_BREAK = 4000
+ACCURACY = 10e-2
+SPEED_BREAK = 2000
 
 class Polynom:
 
